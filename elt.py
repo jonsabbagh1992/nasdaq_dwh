@@ -2,7 +2,6 @@ from elt_manager import ELTmanager
 import os
 from create_tables import initialize_database
 import pandas as pd
-
 CONFIG_FILE = 'dwh.cfg'
 
 initialize_database(CONFIG_FILE)
