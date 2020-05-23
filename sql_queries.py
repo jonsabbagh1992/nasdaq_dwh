@@ -4,8 +4,13 @@ staging_stats_drop = "DROP TABLE IF EXISTS staging_stats"
 staging_companies_drop = "DROP TABLE IF EXISTS staging_companies"
 staging_demographics_drop = "DROP TABLE IF EXISTS staging_demographics"
 staging_daily_quotes_drop = "DROP TABLE IF EXISTS staging_daily_quotes"
-time_dim_drop = "DROP TABLE IF EXISTS timeDim"
-security_dim_drop = "DROP TABLE IF EXISTS securityDim"
+time_dim_drop = "DROP TABLE IF EXISTS time_dim"
+security_dim_drop = "DROP TABLE IF EXISTS security_dim"
+company_dim_drop = "DROP TABLE IF EXISTS company_dim"
+demographics_dim_drop = "DROP TABLE IF EXISTS demographics_dim"
+facts_drop = "DROP TABLE IF EXISTS daily_quotes_fact"
+
+
 
 # CREATE TABLES
 
@@ -185,13 +190,30 @@ time_dim_insert = ("""
                    WHERE row_number = 1
 """)
 
+quotes_fact_insert = ("""WITH first_join AS (
+                        	SELECT s.symbol, c.company_id, c.city, c.state
+                        	FROM company_dim c JOIN security_dim s ON s.company_name = c.company_name
+                        ),
+                        second_join AS (
+                        	SELECT row_number() OVER(PARTITION BY symbol), f.symbol, f.company_id, d.demographic_id
+                        	FROM first_join f JOIN demographics_dim d ON d.city = f.city AND d.state = f.state
+                        ),
+                        unique_ids AS (
+                        	SELECT * FROM second_join
+                        	WHERE row_number = 1
+                        )
+                        
+                        SELECT q.symbol, s.company_id, s.demographic_id, q.open, q.high, q.low, q.close, q.adj_close, CAST(q.volume AS BIGINT)
+                        FROM staging_daily_quotes q JOIN unique_ids s ON q.symbol = s.symbol
+        """)
+
 # QUERY LISTS
 
 create_table_queries = [staging_stats_create, staging_companies_create, staging_demographics_create,
                         staging_daily_quotes_create, time_dim_create, security_dim_create,
                         company_dim_create, demographics_dim_create, fact_table_create]
 drop_table_queries = [staging_stats_drop, staging_companies_drop, staging_demographics_drop,
-                      staging_daily_quotes_drop, time_dim_drop]
+                      staging_daily_quotes_drop, time_dim_drop, security_dim_drop, company_dim_drop, demographics_dim_drop, facts_drop]
 
-insert_queries = [security_dim_insert, company_dim_insert, demographics_dim_insert, time_dim_insert]
+insert_queries = [security_dim_insert, company_dim_insert, demographics_dim_insert, time_dim_insert, quotes_fact_insert]
 
