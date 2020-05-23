@@ -1,7 +1,6 @@
 import configparser
 import psycopg2
 import os
-from sqlalchemy import create_engine
 
 def read_config_file(config_file):
     config = configparser.ConfigParser()
