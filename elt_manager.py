@@ -5,7 +5,10 @@ from iex_api import IEXmanager
 class ELTmanager:
     def __init__(self, config_file):
         self.iex_manager = IEXmanager(config_file)
-        self.conn = create_database_connection(config_file)
+        self.config_file = config_file
+        
+    def open_connection(self):
+        self.conn = create_database_connection(self.config_file)
     
     def initialize_database(self):
         initialize_database(self.conn)
@@ -38,3 +41,17 @@ class ELTmanager:
             except Exception as e:
                 print(e)
                 self.conn.rollback()
+                
+    def run_data_quality_check(self, query, expected_result):
+        cur = self.conn.cursor()
+        
+        cur.execute(query)
+        result = cur.fetchone()[0]
+        
+        if result == expected_result:
+            print("Data Quality Passed")
+        else:
+            print(f"Data Quality failed. Expected {expected_result} but got {result} instead.")
+    
+    def close_connection(self):
+        self.conn.close()
