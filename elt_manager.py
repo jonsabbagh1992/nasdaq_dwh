@@ -3,6 +3,9 @@ from create_tables import initialize_database
 from iex_api import IEXmanager
 
 class ELTmanager:
+    '''
+    Helper class to run the ELT pipeline
+    '''
     def __init__(self, config_file):
         self.iex_manager = IEXmanager(config_file)
         self.config_file = config_file

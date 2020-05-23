@@ -3,6 +3,9 @@ import configparser
 import json
 
 class IEXmanager:
+    '''
+    Helper Class to request data from IEX Cloud API
+    '''
     def __init__(self, config_file):
         config = configparser.ConfigParser()
         config.read(config_file)

@@ -1,11 +1,20 @@
 from elt_manager import ELTmanager
 import os
 import pandas as pd
-from sql_queries import insert_queries
+from sql_queries import insert_queries, data_quality_checks
 
 def main():
+    '''
+    - Initializes Database
+    - Loads Staging tables
+    - Transforms and loads dimensional tables
+    - Runs Data Quality checks
+    '''
     CONFIG_FILE = 'dwh.cfg'
     elt_manager = ELTmanager(CONFIG_FILE)
+    
+    print("Opening Connection.")
+    elt_manager.open_connection()
     
     print("Initializing Database.\n")
     elt_manager.initialize_database()
@@ -13,8 +22,15 @@ def main():
     print("Loading staging tables.")
     load_staging_tables(elt_manager)    
     
-    print("Loading Dimensional data.")
+    print("Loading Dimensional data.\n")
     elt_manager.transform_dimensional_tables(insert_queries)
+    
+    print("Running Data Quality Checks\n")
+    run_data_quality_checks(elt_manager, data_quality_checks)
+    print()
+    
+    print("Closing Connection.")
+    elt_manager.close_connection()
 
 def load_staging_tables(elt_manager):
     load_companies(elt_manager)
@@ -58,11 +74,26 @@ def load_daily_quotes(elt_manager):
                 elt_manager.bulk_load(file_path, 'staging_daily_quotes', sep=',')
     print("Done!\n")
 
-def add_symbol_to_stock_file(file_path, file)   :
+def add_symbol_to_stock_file(file_path, file):
+    '''
+    Helper function that reads a stock file, adds the symbol as a column 
+    and rewrites it so that it can be imported to Postgres    
+    '''
     symbol = file.split('.')[0]
     df = pd.read_csv(file_path)
     df['symbol'] = symbol
     df.to_csv(file_path, index=False)
+
+def run_data_quality_checks(elt_manager, data_quality_checks):
+    '''
+    Runs data quality checks.
+    
+    Key Arguments:
+        elt_manager -- ELTmanager instance
+        data_quality_checks: dictionary of the query string as key and expected result as value
+    '''
+    for query, expected_result in data_quality_checks.items():
+        elt_manager.run_data_quality_check(query, expected_result)
 
 if __name__ == '__main__':
     main()
