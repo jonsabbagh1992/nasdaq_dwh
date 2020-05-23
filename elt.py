@@ -7,7 +7,7 @@ def main():
     CONFIG_FILE = 'dwh.cfg'
     elt_manager = ELTmanager(CONFIG_FILE)
     
-    print("Initializing Database.")
+    print("Initializing Database.\n")
     elt_manager.initialize_database()
     
     print("Loading staging tables.")
@@ -23,22 +23,22 @@ def load_staging_tables(elt_manager):
     load_daily_quotes(elt_manager)
 
 def load_companies(elt_manager):
-    print('Loading Staging Companies Table')
+    print('Loading companies table')
     path = os.path.join(os.getcwd(), 'data', 'companies_with_dummy_demographics.csv')
     elt_manager.bulk_load(path, 'staging_companies', pass_header=True)
-    print('Done!')
+    print('Done!\n')
     
 def load_company_statistics(elt_manager):
-    print('Loading stats Table')
+    print('Loading stats table')
     path = os.path.join(os.getcwd(), 'data', 'company_stats.csv')
     elt_manager.bulk_load(path, 'staging_stats', pass_header=True)
-    print('Done!')
+    print('Done!\n')
 
 def load_demographics(elt_manager):
-    print('Loading Demograhpics Table')
+    print('Loading demograhpics table')
     path = os.path.join(os.getcwd(), 'data', 'us-cities-demographics.csv')
     elt_manager.bulk_load(path, 'staging_demographics')
-    print('Done!')
+    print('Done!\n')
 
 def load_daily_quotes(elt_manager):
     print("Loading daily quotes. This will take a few minutes...")
@@ -56,7 +56,7 @@ def load_daily_quotes(elt_manager):
                     errors.append((file, e))
                     continue
                 elt_manager.bulk_load(file_path, 'staging_daily_quotes', sep=',')
-    print("Done!")
+    print("Done!\n")
 
 def add_symbol_to_stock_file(file_path, file)   :
     symbol = file.split('.')[0]
