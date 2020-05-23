@@ -66,7 +66,9 @@ low           | Float         | Lowest price in the day
 close         | Float         | Closing price
 adj_close     | Float         | Adjusted closing price
 
+
 2. **security_dim**
+
 
 Field Name        | Data Type     | Description     
 -------------    |-------------  | -------------
@@ -98,7 +100,9 @@ exdividenddate     | Text       | Ex date of the last dividend
 peRatio            | Float      | Price to earnings ratio calculated as (previous day close price) / (ttmEPS)
 beta               | Float      | Beta is a measure used in fundamental analysis to determine the volatility of an asset or portfolio in relation to the overall market. Levered beta calculated with 1 year historical data and compared to SPY.
 
+
 3. **companies_dim**
+
 
 Field Name    | Data Type     | Description     
 ------------- |-------------  | -------------
@@ -117,7 +121,9 @@ zip           | Text          | Zip of the company if available
 country       | Text          | Country of the company if available
 phone         | Text          | Phone number of the company if available
 
+
 4. **demographics_dim**
+
 
 Field Name    | Data Type     | Description     
 ------------- |-------------  | -------------
@@ -162,7 +168,7 @@ How to Run
 
 1. Ensure PostgreSQL is configured in your local environment
 2. Input the required configuration details in **dwh.cfg**
-3. Download the stock-market-dataset and unzip in a called **stock-market-dataset** in the **data** folder.
+3. Download the stock-market-dataset and unzip to **stock-market-dataset/data**
 4. run **etl.py**
 
 Enjoy your new NASDAQ Data Warehouse! 
