@@ -24,3 +24,13 @@ class ELTmanager:
         except Exception as e:
             print(e)
             self.conn.rollback()
+            
+    def transform_dimensional_tables(self, insert_queries):
+        cur = self.conn.cursor()
+        for query in insert_queries:
+            try:
+                cur.execute(query)
+                self.conn.commit()
+            except Exception as e:
+                print(e)
+                self.conn.rollback()
