@@ -1,5 +1,4 @@
 from sql_queries import create_table_queries, drop_table_queries
-from create_connection import create_database_connection
 
 def drop_tables(cur, conn):
     """
@@ -18,7 +17,7 @@ def create_tables(cur, conn):
         conn.commit()
 
 
-def initialize_database(config_file):
+def initialize_database(conn):
     """
     - Establishes connection with the database and gets
     cursor to it.  
@@ -26,13 +25,8 @@ def initialize_database(config_file):
     - Drops all the tables.  
     
     - Creates all tables needed. 
-    
-    - Finally, closes the connection. 
     """
-    conn = create_database_connection(config_file)
     cur = conn.cursor()
     
     drop_tables(cur, conn)
     create_tables(cur, conn)
-
-    conn.close()

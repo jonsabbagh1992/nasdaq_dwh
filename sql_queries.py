@@ -126,7 +126,7 @@ fact_table_create = ("""CREATE TABLE IF NOT EXISTS daily_quotes_fact (
                                     low FLOAT,
                                     close FLOAT,
                                     adj_close FLOAT,
-                                    volume INT
+                                    volume BIGINT
                         )
                      
 """)
@@ -202,8 +202,8 @@ quotes_fact_insert = ("""WITH first_join AS (
                         	SELECT * FROM second_join
                         	WHERE row_number = 1
                         )
-                        
-                        SELECT q.symbol, s.company_id, s.demographic_id, q.open, q.high, q.low, q.close, q.adj_close, CAST(q.volume AS BIGINT)
+                        INSERT INTO daily_quotes_fact (symbol, company_id, date, demographic_id, open, high, low, close, adj_close, volume)
+                        SELECT q.symbol, s.company_id, q.date, s.demographic_id, q.open, q.high, q.low, q.close, q.adj_close, CAST(q.volume AS BIGINT)
                         FROM staging_daily_quotes q JOIN unique_ids s ON q.symbol = s.symbol
         """)
 
