@@ -211,7 +211,7 @@ quotes_fact_insert = ("""WITH first_join AS (
 check_company_count = 'SELECT count(*) FROM company_dim'
 check_security_count = 'SELECT count(*) FROM security_dim'
 check_demographic_count = 'SELECT count(*) FROM demographics_dim'
-check_facts_count = 'SELECT count(*) FROM daily_quotes_fact'
+check_facts_null = 'SELECT count(*) FROM daily_quotes_fact WHERE symbol IS NULL'
 check_time_count = 'SELECT count(*) FROM time_dim'
 
 # QUERY COLLECTIONS
@@ -228,7 +228,7 @@ data_quality_checks = {
         check_company_count: 7680,
         check_security_count: 8042,
         check_demographic_count: 2891,
-        check_facts_count: 28101672,
+        check_facts_null: 0,
         check_time_count: 14718
         }
 
