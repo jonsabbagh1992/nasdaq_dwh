@@ -206,8 +206,15 @@ quotes_fact_insert = ("""WITH first_join AS (
                         SELECT q.symbol, s.company_id, q.date, s.demographic_id, q.open, q.high, q.low, q.close, q.adj_close, CAST(q.volume AS BIGINT)
                         FROM staging_daily_quotes q JOIN unique_ids s ON q.symbol = s.symbol
         """)
+                        
+# DATA QUALITY QUERIES
+check_company_count = 'SELECT count(*) FROM company_dim'
+check_security_count = 'SELECT count(*) FROM security_dim'
+check_demographic_count = 'SELECT count(*) FROM demographics_dim'
+check_facts_count = 'SELECT count(*) FROM daily_quotes_fact'
+check_time_count = 'SELECT count(*) FROM time_dim'
 
-# QUERY LISTS
+# QUERY COLLECTIONS
 
 create_table_queries = [staging_stats_create, staging_companies_create, staging_demographics_create,
                         staging_daily_quotes_create, time_dim_create, security_dim_create,
@@ -216,4 +223,12 @@ drop_table_queries = [staging_stats_drop, staging_companies_drop, staging_demogr
                       staging_daily_quotes_drop, time_dim_drop, security_dim_drop, company_dim_drop, demographics_dim_drop, facts_drop]
 
 insert_queries = [security_dim_insert, company_dim_insert, demographics_dim_insert, time_dim_insert, quotes_fact_insert]
+
+data_quality_checks = {
+        check_company_count: 7680,
+        check_security_count: 8042,
+        check_demographic_count: 2891,
+        check_facts_count: 28101672,
+        check_time_count: 14718
+        }
 
