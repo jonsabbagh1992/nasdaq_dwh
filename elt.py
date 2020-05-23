@@ -2,6 +2,8 @@ from elt_manager import ELTmanager
 import os
 from create_tables import initialize_database
 import pandas as pd
+from sql_queries import insert_queries
+
 CONFIG_FILE = 'dwh.cfg'
 
 initialize_database(CONFIG_FILE)
@@ -46,3 +48,6 @@ for root, dirs, files in os.walk(path):
                 continue
             elt_manager.bulk_load(file_path, 'staging_daily_quotes', sep=',')
 print("Done!")
+
+print("Loading Dimensional data")
+elt_manager.transform_dimensional_tables(insert_queries)
