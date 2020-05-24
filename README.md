@@ -1,32 +1,32 @@
 NASDAQ DATA WAREHOUSE
 =====================
 
-This project is a proof of concept for a Data Warehouse of NASDAQ stock data. There are a few available datasets out there that include historical data of securites. This project leverages those existing dataset and enriches it with demographics data and more information on the security and company. The data is modeled into an easy to use star schema. The hope is that data scientists, business intelligence analysts and data analysts can query this dataset to draw insights and build machine learning models.
+This project is a proof of concept for a Data Warehouse of NASDAQ stock data. There are already a few available datasets out there that include historical data of securities. This project leverages those existing dataset and enriches it with demographics data and more information on the security and company. The data is modeled into an easy to use star schema. The hope is that data scientists, business intelligence analysts and data analysts can query this dataset to draw insights and build machine learning models.
 
-Since this is a proof of concept, some of the sourced data is not **real** data but rather test data queried from a financial data provider (more info is available in the data sources section)
+Since this is a proof of concept, some of the sourced data is not **real** data but rather test data queried from a financial data provider (more info is available in the data sources section).
 
 DATA SOURCES
 ============
 
-1. **Stock Market Dataset**: This data is publicly availabe on Kaggle and can be found [here](https://www.kaggle.com/jacksoncrow/stock-market-dataset). It contains historical daily prices for all tickers currently trading on NASDAQ
+1. **Stock Market Dataset**: This data is publicly availabe on Kaggle and can be found [here](https://www.kaggle.com/jacksoncrow/stock-market-dataset). It contains historical daily prices for all tickers currently trading on NASDAQ.
 
 2. **Demographics Dataset**: This data comes from OpenSoft. It contains information about the demographics of all US cities and census-designated places with a population greater or equal to 65,000. You can read more about it [here](https://public.opendatasoft.com/explore/dataset/us-cities-demographics/export/).
 
 3. **IEX Cloud Financial Data**: The two datasets below are downloaded using an API from [IEX Cloud](https://iexcloud.io/), a financial data provider. Please note that I used the test API so as to avoid incurring unecessary costs.
     - **Company Profile**: This dataset provides key information about the company that issued the security as well as additional information about the security itself. You can read more about the data element [here](https://iexcloud.io/docs/api/#company) Please note that the dataset provided in the repo was filled with demographics data because the API return randomized strings so as to allow to connect to the demographics table. 
-    - **Company Key Statistics**: This dataset enriches the comapny profile with financial statistics on the company and the security. You can read more about it [here](https://iexcloud.io/docs/api/#key-stats)
+    - **Company Key Statistics**: This dataset enriches the comapny profile with financial statistics on the company and the security. You can read more about it [here](https://iexcloud.io/docs/api/#key-stats).
     
 DATA MODEL
 ============
 
-I chose a simple to use star schema with the grain (daily quotes)  as granular as possible. The intent is to provide consumers the flexibility to slice, dice and aggregate the data however they want so that they can generate the reports and/or mathematical models they want. As a result, I avoided aggregating the data.
+I chose a simple to use star schema with the grain (daily quotes) as granular as possible. The intent is to provide consumers the flexibility to slice, dice and aggregate the data however they want so that they can generate the reports and/or mathematical models they want. As a result, I avoided aggregating the data.
 
 Here are the dimensional tables. Please consult the data dictionary for more information on these tables.
 
 Facts Table
 -----------
 
-1. **daily_quotes_fact**: The grain is daily quotes for all the securities avaiable in this dataset.
+1. **daily_quotes_fact**: The grain is daily quotes for all the securities available in this dataset.
     - *quote_id, symbol, company_id, date, demographic_id, open, high, low, close, adj_close, volume*
     
 Dimensions Table
@@ -36,7 +36,7 @@ Dimensions Table
     - *symbol, primary_sic_code, security_name, company_name, issue_type, exchange, market_cap, week52change, week52high, week52low, shares_outstanding, maxChangePercent, year5ChangePercent, year2ChangePercent, year1ChangePercent, ytdChangePercent, month6ChangePercent, month3ChangePercent, month1ChangePercent, day30ChangePercent, day5ChangePercent, nextdividenddate, dividendyield, nextearningsdate, exdividenddate, peratio, beta*
 
 
-3. **company_dim**: Includes all available information and on the issuing company.
+3. **company_dim**: Includes all available information on the issuing company.
     - *company_id, company_name, industry, website, description, ceo, sector, employees, address, address2, state, city, zip, country, phone*
     
     
@@ -80,7 +80,7 @@ security_name    | Text          | Name of the security
 company_name     | Text          | Name of the company
 issue_type       | Text          | refers to the common issue type of the stock.
 exchange         | Text          | Exchange it is trading on
-market_cap       | Float         | Market cap of the security calculated as shares outstanding * previous day close.
+market_cap       | Float         | Market cap of the security calculated as shares outstanding x previous day close.
 week52change     | Float         | Percentage change
 week52high       | Float         |
 week52low        | Float         |
@@ -149,7 +149,7 @@ count         | Integer       |
 Tools Used
 ==========
 
-1. **Python**: The ELT pipeline was processed with the PyData stack (Pandas). Given its relatively small size (approximately 3 GB), using big data analytics tools like Spark would likely hinder performance
+1. **Python**: The ELT pipeline was processed with the PyData stack (Pandas). Given its relatively small size (approximately 3 GB), using big data analytics tools like Spark would likely hinder performance.
 
 2. **PostgreSQL**: Postgres was the ideal solution for this use case, given the relatively small size of the data. It is open source and offers lots of flexibility to create a star schema. With future enhancements, I may consider migrating the database to a columnar oriented database (some extensions for Postgres exists and/or Redshift).
 
@@ -162,7 +162,7 @@ The IEX Cloud API offers live data (updated every second). I would like to lever
 
 2. **Automated Data Pipeline**
 
-To be able to provide to functionality of updating the database with new data on a given cadence (e.g. daily, hourly etc..), a proper scheduler would be required. Airflow seems like a perfect choice. Future enhancements will leverage the powerful abilities of airflow. 
+To be able to provide to functionality of updating the database with new data on a given cadence (e.g. daily, hourly etc..), a proper scheduler would be required. Airflow seems like a perfect choice. Future enhancements will leverage the powerful abilities of Airflow. 
 
 3. **Multi-User Access**
 
@@ -174,6 +174,6 @@ How to Run
 1. Ensure PostgreSQL is configured in your local environment
 2. Input the required configuration details in **dwh.cfg**
 3. Download the stock-market-dataset and unzip to **stock-market-dataset/data**
-4. run **etl.py**
+4. run **elt.py**
 
 Enjoy your new NASDAQ Data Warehouse! 
