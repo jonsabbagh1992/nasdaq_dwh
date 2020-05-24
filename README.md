@@ -50,7 +50,9 @@ Dimensions Table
 DATA DICTIONARY
 ===============
 
-1. **daily_quotes_fact**
+daily_quotes_fact
+-----------------
+
 
 
 Field Name    | Data Type     | Description     
@@ -67,8 +69,8 @@ close         | Float         | Closing price
 adj_close     | Float         | Adjusted closing price
 
 
-2. **security_dim**
-
+security_dim
+-------------
 
 Field Name        | Data Type     | Description     
 -------------    |-------------  | -------------
@@ -101,7 +103,8 @@ peRatio            | Float      | Price to earnings ratio calculated as (previou
 beta               | Float      | Beta is a measure used in fundamental analysis to determine the volatility of an asset or portfolio in relation to the overall market. Levered beta calculated with 1 year historical data and compared to SPY.
 
 
-3. **companies_dim**
+company_dim
+------------
 
 
 Field Name    | Data Type     | Description     
@@ -122,7 +125,8 @@ country       | Text          | Country of the company if available
 phone         | Text          | Phone number of the company if available
 
 
-4. **demographics_dim**
+demographics_dim
+----------------
 
 
 Field Name    | Data Type     | Description     
@@ -140,6 +144,7 @@ avg_household_size | Float    | Average of people in a household
 state_code    | Text          | 
 race          | Text          | List of ethnic races in the city
 count         | Integer       |
+
 
 Tools Used
 ==========
