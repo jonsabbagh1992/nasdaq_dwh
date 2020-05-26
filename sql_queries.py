@@ -4,11 +4,11 @@ staging_stats_drop = "DROP TABLE IF EXISTS staging_stats"
 staging_companies_drop = "DROP TABLE IF EXISTS staging_companies"
 staging_demographics_drop = "DROP TABLE IF EXISTS staging_demographics"
 staging_daily_quotes_drop = "DROP TABLE IF EXISTS staging_daily_quotes"
-time_dim_drop = "DROP TABLE IF EXISTS time_dim"
-security_dim_drop = "DROP TABLE IF EXISTS security_dim"
-company_dim_drop = "DROP TABLE IF EXISTS company_dim"
-demographics_dim_drop = "DROP TABLE IF EXISTS demographics_dim"
-facts_drop = "DROP TABLE IF EXISTS daily_quotes_fact"
+time_dim_drop = "DROP TABLE IF EXISTS time_dim CASCADE"
+security_dim_drop = "DROP TABLE IF EXISTS security_dim CASCADE"
+company_dim_drop = "DROP TABLE IF EXISTS company_dim CASCADE"
+demographics_dim_drop = "DROP TABLE IF EXISTS demographics_dim CASCADE"
+facts_drop = "DROP TABLE IF EXISTS daily_quotes_fact CASCADE"
 
 
 
@@ -115,7 +115,23 @@ demographics_dim_create = ("""CREATE TABLE IF NOT EXISTS demographics_dim (
                                     count INT);
 """)
 
-fact_table_create = ("""CREATE TABLE IF NOT EXISTS daily_quotes_fact (
+fact_table_create_with_referential = ("""CREATE TABLE IF NOT EXISTS daily_quotes_fact (
+                                    quote_id SERIAL PRIMARY KEY,
+                                    symbol VARCHAR NOT NULL REFERENCES security_dim (symbol),
+                                    company_id INT NOT NULL REFERENCES company_dim (company_id),
+                                    date DATE NOT NULL REFERENCES time_dim (date),
+                                    demographic_id INT NOT NULL REFERENCES demographics_dim (demographic_id),
+                                    open FLOAT,
+                                    high FLOAT,
+                                    low FLOAT,
+                                    close FLOAT,
+                                    adj_close FLOAT,
+                                    volume BIGINT
+                        )
+                     
+""")
+
+fact_table_create_no_referential = ("""CREATE TABLE IF NOT EXISTS daily_quotes_fact (
                                     quote_id SERIAL PRIMARY KEY,
                                     symbol VARCHAR,
                                     company_id INT,
@@ -216,9 +232,15 @@ check_time_count = 'SELECT count(*) FROM time_dim'
 
 # QUERY COLLECTIONS
 
-create_table_queries = [staging_stats_create, staging_companies_create, staging_demographics_create,
+create_table_queries_no_referential = [staging_stats_create, staging_companies_create, staging_demographics_create,
                         staging_daily_quotes_create, time_dim_create, security_dim_create,
-                        company_dim_create, demographics_dim_create, fact_table_create]
+                        company_dim_create, demographics_dim_create, fact_table_create_no_referential]
+
+create_table_queries_with_referential = [staging_stats_create, staging_companies_create, staging_demographics_create,
+                        staging_daily_quotes_create, time_dim_create, security_dim_create,
+                        company_dim_create, demographics_dim_create, fact_table_create_with_referential]
+
+
 drop_table_queries = [staging_stats_drop, staging_companies_drop, staging_demographics_drop,
                       staging_daily_quotes_drop, time_dim_drop, security_dim_drop, company_dim_drop, demographics_dim_drop, facts_drop]
 
