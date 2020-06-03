@@ -3,10 +3,13 @@ from scripts.iex_api import IEXmanager
 import unittest
 import configparser
 import os
+import pandas as pd
 
 CONFIG_FILE = 'test_cfg.cfg'
 config = configparser.ConfigParser()
 config.read(CONFIG_FILE)  
+DATA_DIRECTORY = os.path.join('..', 'data')
+
     
 os.environ['HOST'] = config.get("POSTGRES", "HOST")
 os.environ['DB_NAME'] = config.get("POSTGRES", "DB_NAME")
@@ -51,10 +54,44 @@ class TestELTmanager(unittest.TestCase):
         
         # test tables are empty
         for table in retrieved_tables:
-            query = f"SELECT COUNT(*) FROM {table}"
-            cur.execute(query)
-            rows_in_table = cur.fetchone()[0]
+            rows_in_table = get_table_count(elt_manager, table)
             self.assertEqual(rows_in_table, EXPECTED_ROWS_IN_TABLE)
             
+    def test_bulk_load(self):
+        FILE1 = os.path.join(DATA_DIRECTORY, 'stock-market-dataset', 'stocks', 'AACG.csv')
+        FILE2 = os.path.join(DATA_DIRECTORY, 'stock-market-dataset', 'stocks','ACGL.csv')
+        
+        df1 = pd.read_csv(FILE1)
+        df2 = pd.read_csv(FILE2)
+        
+        elt_manager = ELTmanager(CONFIG_FILE)
+        elt_manager.open_connection()
+        table = 'staging_daily_quotes'
+        
+        # test individual files are loaded properly
+        for file, data in [(FILE1, df1), (FILE2, df2)]:
+            expected_rows = data.shape[0]
+            elt_manager.initialize_database()
+            elt_manager.bulk_load(file, table, sep=',')
+            rows_in_table = get_table_count(elt_manager, table)
+            self.assertEqual(rows_in_table, expected_rows)
+            
+        # test several files are loaded properly
+        elt_manager.initialize_database()
+        total_expected_rows = df1.shape[0] + df2.shape[0] 
+        for file in [FILE1, FILE2]:
+            elt_manager.bulk_load(file, table, sep=',')
+        rows_in_table = get_table_count(elt_manager, table)
+        self.assertEqual(rows_in_table, total_expected_rows)
+    
+# HELPER FUNCTIONS
+def get_table_count(elt_manager, table):
+    COUNT_QUERY = f"SELECT COUNT(*) FROM {table}"
+    conn = elt_manager.conn
+    cur = conn.cursor()
+    cur.execute(COUNT_QUERY)
+    
+    return cur.fetchone()[0]
+
 if __name__ == '__main__':
     unittest.main()
