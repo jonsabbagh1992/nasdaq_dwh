@@ -6,7 +6,7 @@ import os
 CONFIG_FILE = 'test_cfg.cfg'
 WRONG_SECTION = 'wrong_section_cfg.cfg'
 
-class TestELTmanager(unittest.TestCase):
+class TestCreateConnection(unittest.TestCase):
     def test_cread_config_file(self):
         SECTION = 'POSTGRES'
         OPTIONS = ['HOST', 'DB_NAME', 'USER', 'PASSWORD', 'PORT']
