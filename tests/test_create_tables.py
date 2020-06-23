@@ -1,7 +1,6 @@
 from scripts import create_connection
 from scripts import create_tables
 import unittest
-import os
 
 CONFIG_FILE = 'test_cfg.cfg'
 
