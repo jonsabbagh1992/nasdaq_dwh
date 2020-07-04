@@ -147,6 +147,12 @@ fact_table_create_no_referential = ("""CREATE TABLE IF NOT EXISTS daily_quotes_f
                      
 """)
 
+#CREATE INDICES
+symbol_fact_index  = ("CREATE INDEX symbol_fact_index ON daily_quotes_fact(symbol)")
+company_fact_index  = ("CREATE INDEX company_fact_index ON daily_quotes_fact(company_id)")
+demographic_fact_index  = ("CREATE INDEX demographic_fact_index ON daily_quotes_fact(demographic_id)")
+
+
 # INSERT QUERIES
 
 security_dim_insert = ("""INSERT INTO security_dim (symbol, primary_sic_code, security_name, company_name, issue_type, exchange, market_cap,
@@ -243,6 +249,8 @@ create_table_queries_with_referential = [staging_stats_create, staging_companies
 
 drop_table_queries = [staging_stats_drop, staging_companies_drop, staging_demographics_drop,
                       staging_daily_quotes_drop, time_dim_drop, security_dim_drop, company_dim_drop, demographics_dim_drop, facts_drop]
+
+index_queries = [symbol_fact_index, company_fact_index, demographic_fact_index]
 
 insert_queries = [security_dim_insert, company_dim_insert, demographics_dim_insert, time_dim_insert, quotes_fact_insert]
 

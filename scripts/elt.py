@@ -19,7 +19,7 @@ def main():
     elt_manager.open_connection()
     
     print("Initializing Database.\n")
-    elt_manager.initialize_database()
+    elt_manager.initialize_database(referential=True)
     
     print("Loading staging tables.")
     load_staging_tables(elt_manager)    

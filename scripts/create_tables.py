@@ -1,4 +1,4 @@
-from scripts.sql_queries import create_table_queries_no_referential, create_table_queries_with_referential, drop_table_queries
+from scripts.sql_queries import create_table_queries_no_referential, create_table_queries_with_referential, drop_table_queries, index_queries
 
 def drop_tables(cur, conn):
     """
@@ -21,6 +21,11 @@ def create_tables(cur, conn, referential):
     for query in create_table_queries:
         cur.execute(query)
         conn.commit()
+        
+def create_indices(cur, conn):
+    for query in index_queries:
+        cur.execute(query)
+        conn.commit()
 
 def initialize_database(conn, referential=False):
     """
@@ -39,3 +44,4 @@ def initialize_database(conn, referential=False):
     
     drop_tables(cur, conn)
     create_tables(cur, conn, referential)
+    create_indices(cur, conn)

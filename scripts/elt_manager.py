@@ -14,8 +14,8 @@ class ELTmanager:
         self.conn = create_database_connection(self.config_file)
         assert self.conn is not None
         
-    def initialize_database(self):
-        initialize_database(self.conn)
+    def initialize_database(self, referential=False):
+        initialize_database(self.conn, referential)
     
     def bulk_load(self,
                   source_data,
