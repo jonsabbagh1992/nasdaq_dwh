@@ -49,7 +49,7 @@ Dimensions Table
 
 Entity Relationship Diagram
 ===========================
-![ERD](erd.png)
+![ERD](https://github.com/jonsabbagh1992/nasdaq_dwh/blob/master/erd.PNG)
 
 DATA DICTIONARY
 ===============
