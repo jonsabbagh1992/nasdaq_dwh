@@ -1,9 +1,9 @@
 # DROP TABLES
 
-staging_stats_drop = "DROP TABLE IF EXISTS staging_stats"
-staging_companies_drop = "DROP TABLE IF EXISTS staging_companies"
-staging_demographics_drop = "DROP TABLE IF EXISTS staging_demographics"
-staging_daily_quotes_drop = "DROP TABLE IF EXISTS staging_daily_quotes"
+staging_stats_drop = "DROP TABLE IF EXISTS staging.stats"
+staging_companies_drop = "DROP TABLE IF EXISTS staging.companies"
+staging_demographics_drop = "DROP TABLE IF EXISTS staging.demographics"
+staging_daily_quotes_drop = "DROP TABLE IF EXISTS staging.daily_quotes"
 time_dim_drop = "DROP TABLE IF EXISTS time_dim CASCADE"
 security_dim_drop = "DROP TABLE IF EXISTS security_dim CASCADE"
 company_dim_drop = "DROP TABLE IF EXISTS company_dim CASCADE"
@@ -15,7 +15,9 @@ facts_drop = "DROP TABLE IF EXISTS daily_quotes_fact CASCADE"
 # CREATE TABLES
 
 # Staging
-staging_stats_create = ("""CREATE TABLE IF NOT EXISTS staging_stats (
+staging_schema_create = "CREATE SCHEMA IF NOT EXISTS staging"
+
+staging_stats_create = ("""CREATE TABLE IF NOT EXISTS staging.stats (
                                      symbol VARCHAR,
                                      week52change FLOAT, week52high FLOAT, week52low FLOAT, marketcap FLOAT, employees FLOAT,
                                      day200MovingAvg FLOAT, day50MovingAvg FLOAT, float FLOAT, avg10Volume FLOAT, avg30Volume FLOAT,
@@ -26,14 +28,14 @@ staging_stats_create = ("""CREATE TABLE IF NOT EXISTS staging_stats (
                                      peratio FLOAT, beta FLOAT);
 """)
 
-staging_companies_create = ("""CREATE TABLE IF NOT EXISTS staging_companies (
+staging_companies_create = ("""CREATE TABLE IF NOT EXISTS staging.companies (
                                     symbol VARCHAR, companyName VARCHAR, exchange VARCHAR, industry VARCHAR,
                                     website VARCHAR, description VARCHAR, CEO VARCHAR, securityName VARCHAR, issueType VARCHAR,
                                     sector VARCHAR, primarySicCode FLOAT, employees FLOAT, address VARCHAR, address2 VARCHAR,
                                     state VARCHAR, city VARCHAR, zip VARCHAR, country VARCHAR, phone VARCHAR);
 """)
 
-staging_demographics_create = ("""CREATE TABLE IF NOT EXISTS staging_demographics (
+staging_demographics_create = ("""CREATE TABLE IF NOT EXISTS staging.demographics (
                                     city VARCHAR,
                                     state VARCHAR,
                                     median_age FLOAT,
@@ -45,7 +47,7 @@ staging_demographics_create = ("""CREATE TABLE IF NOT EXISTS staging_demographic
                                     count FLOAT);
 """)
 
-staging_daily_quotes_create = ("""CREATE TABLE IF NOT EXISTS staging_daily_quotes(
+staging_daily_quotes_create = ("""CREATE TABLE IF NOT EXISTS staging.daily_quotes(
                                     date DATE,
                                     open FLOAT,
                                     high FLOAT,
@@ -67,7 +69,8 @@ time_dim_create = ("""CREATE TABLE IF NOT EXISTS time_dim (date DATE PRIMARY KEY
 # Facts & Dims
 
 security_dim_create = ("""CREATE TABLE IF NOT EXISTS security_dim (
-                                    symbol VARCHAR PRIMARY KEY,
+                                    security_id SERIAL PRIMARY KEY,
+                                    symbol VARCHAR NOT NULL,
                                     primary_sic_code INT,
                                     security_name VARCHAR NOT NULL,
                                     company_name VARCHAR,
@@ -117,7 +120,7 @@ demographics_dim_create = ("""CREATE TABLE IF NOT EXISTS demographics_dim (
 
 fact_table_create_with_referential = ("""CREATE TABLE IF NOT EXISTS daily_quotes_fact (
                                     quote_id SERIAL PRIMARY KEY,
-                                    symbol VARCHAR NOT NULL REFERENCES security_dim (symbol),
+                                    security_id int NOT NULL REFERENCES security_dim (security_id),
                                     company_id INT NOT NULL REFERENCES company_dim (company_id),
                                     date DATE NOT NULL REFERENCES time_dim (date),
                                     demographic_id INT NOT NULL REFERENCES demographics_dim (demographic_id),
@@ -133,7 +136,7 @@ fact_table_create_with_referential = ("""CREATE TABLE IF NOT EXISTS daily_quotes
 
 fact_table_create_no_referential = ("""CREATE TABLE IF NOT EXISTS daily_quotes_fact (
                                     quote_id SERIAL PRIMARY KEY,
-                                    symbol VARCHAR,
+                                    security_id int,
                                     company_id INT,
                                     date DATE,
                                     demographic_id INT,
@@ -148,7 +151,7 @@ fact_table_create_no_referential = ("""CREATE TABLE IF NOT EXISTS daily_quotes_f
 """)
 
 #CREATE INDICES
-symbol_fact_index  = ("CREATE INDEX symbol_fact_index ON daily_quotes_fact(symbol)")
+symbol_fact_index  = ("CREATE INDEX security_fact_index ON daily_quotes_fact(security_id)")
 company_fact_index  = ("CREATE INDEX company_fact_index ON daily_quotes_fact(company_id)")
 demographic_fact_index  = ("CREATE INDEX demographic_fact_index ON daily_quotes_fact(demographic_id)")
 
@@ -169,7 +172,7 @@ security_dim_insert = ("""INSERT INTO security_dim (symbol, primary_sic_code, se
                                  s.ytdChangePercent, s.month6ChangePercent, s.month3ChangePercent, s.month1ChangePercent,
                                  s.day30ChangePercent, s.day5ChangePercent, s.nextdividenddate, s.dividendyield, s.nextearningsdate, s.exdividenddate,
                             	 s.peratio, s.beta
-                          FROM staging_companies c JOIN staging_stats s ON s.symbol = c.symbol
+                          FROM staging.companies c JOIN staging.stats s ON s.symbol = c.symbol
 """)
 
 company_dim_insert = ("""
@@ -181,7 +184,7 @@ company_dim_insert = ("""
                 			   companyname, industry, website, description, ceo, sector,
                 			   CAST(employees AS BIGINT), address, address2, state, city,
                 			   zip, country, phone
-                		FROM staging_companies)
+                		FROM staging.companies)
                      SELECT companyname, industry, website, description, ceo, sector,
                      		CAST(employees AS BIGINT), address, address2, state, city,
                      		zip, country, phone
@@ -193,7 +196,7 @@ demographics_dim_insert = ("""INSERT INTO demographics_dim (city, state, median_
                                                            number_veterans, foreign_born, avg_household_size, state_code, race, count)
                               SELECT city, state, median_age, CAST(male_population AS INT), CAST(female_population AS INT), CAST(total_population AS INT),
                                      CAST(number_veterans AS INT), CAST(foreign_born AS INT), avg_household_size, state_code, race, CAST(count AS INT)
-                              FROM staging_demographics
+                              FROM staging.demographics
 """)
 
 time_dim_insert = ("""
@@ -206,43 +209,42 @@ time_dim_insert = ("""
                     		   EXTRACT(month FROM date)   AS month,
                     		   EXTRACT(year FROM date)    AS year,
                     		   EXTRACT(dow FROM date)     AS weekday
-                    	FROM staging_daily_quotes)
+                    	FROM staging.daily_quotes)
                    SELECT date, day, week, month, year, weekday
                    FROM partitioned_by_date
                    WHERE row_number = 1
 """)
 
 quotes_fact_insert = ("""WITH first_join AS (
-                        	SELECT s.symbol, c.company_id, c.city, c.state
+                        	SELECT s.security_id, s.symbol, c.company_id, c.city, c.state
                         	FROM company_dim c JOIN security_dim s ON s.company_name = c.company_name
                         ),
                         second_join AS (
-                        	SELECT row_number() OVER(PARTITION BY symbol), f.symbol, f.company_id, d.demographic_id
+                        	SELECT row_number() OVER(PARTITION BY symbol), f.symbol, f.security_id, f.company_id, d.demographic_id
                         	FROM first_join f JOIN demographics_dim d ON d.city = f.city AND d.state = f.state
                         ),
                         unique_ids AS (
                         	SELECT * FROM second_join
                         	WHERE row_number = 1
                         )
-                        INSERT INTO daily_quotes_fact (symbol, company_id, date, demographic_id, open, high, low, close, adj_close, volume)
-                        SELECT q.symbol, s.company_id, q.date, s.demographic_id, q.open, q.high, q.low, q.close, q.adj_close, CAST(q.volume AS BIGINT)
-                        FROM staging_daily_quotes q JOIN unique_ids s ON q.symbol = s.symbol
+						INSERT INTO daily_quotes_fact (security_id, company_id, date, demographic_id, open, high, low, close, adj_close, volume)
+                        SELECT s.security_id, s.company_id, q.date, s.demographic_id, q.open, q.high, q.low, q.close, q.adj_close, CAST(q.volume AS BIGINT)
+                        FROM staging.daily_quotes q JOIN unique_ids s ON q.symbol = s.symbol
         """)
                         
 # DATA QUALITY QUERIES
 check_company_count = 'SELECT count(*) FROM company_dim'
 check_security_count = 'SELECT count(*) FROM security_dim'
 check_demographic_count = 'SELECT count(*) FROM demographics_dim'
-check_facts_null = 'SELECT count(*) FROM daily_quotes_fact WHERE symbol IS NULL'
 check_time_count = 'SELECT count(*) FROM time_dim'
 
 # QUERY COLLECTIONS
 
-create_table_queries_no_referential = [staging_stats_create, staging_companies_create, staging_demographics_create,
+create_table_queries_no_referential = [staging_schema_create, staging_stats_create, staging_companies_create, staging_demographics_create,
                         staging_daily_quotes_create, time_dim_create, security_dim_create,
                         company_dim_create, demographics_dim_create, fact_table_create_no_referential]
 
-create_table_queries_with_referential = [staging_stats_create, staging_companies_create, staging_demographics_create,
+create_table_queries_with_referential = [staging_schema_create, staging_stats_create, staging_companies_create, staging_demographics_create,
                         staging_daily_quotes_create, time_dim_create, security_dim_create,
                         company_dim_create, demographics_dim_create, fact_table_create_with_referential]
 

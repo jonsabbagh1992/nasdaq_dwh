@@ -43,19 +43,19 @@ def load_staging_tables(elt_manager):
 def load_companies(elt_manager):
     print('Loading companies table')
     path = os.path.join(DATA_DIRECTORY, 'companies_with_dummy_demographics.csv')
-    elt_manager.bulk_load(path, 'staging_companies', pass_header=True)
+    elt_manager.bulk_load(path, 'staging.companies', pass_header=True)
     print('Done!\n')
     
 def load_company_statistics(elt_manager):
     print('Loading stats table')
     path = os.path.join(DATA_DIRECTORY, 'company_stats.csv')
-    elt_manager.bulk_load(path, 'staging_stats', pass_header=True)
+    elt_manager.bulk_load(path, 'staging.stats', pass_header=True)
     print('Done!\n')
 
 def load_demographics(elt_manager):
     print('Loading demograhpics table')
     path = os.path.join(DATA_DIRECTORY, 'us-cities-demographics.csv')
-    elt_manager.bulk_load(path, 'staging_demographics')
+    elt_manager.bulk_load(path, 'staging.demographics')
     print('Done!\n')
 
 def load_daily_quotes(elt_manager):
@@ -73,7 +73,7 @@ def load_daily_quotes(elt_manager):
                     print(e)
                     errors.append((file, e))
                     continue
-                elt_manager.bulk_load(file_path, 'staging_daily_quotes', sep=',')
+                elt_manager.bulk_load(file_path, 'staging.daily_quotes', sep=',')
     print("Done!\n")
 
 def add_symbol_to_stock_file(file_path, file):
