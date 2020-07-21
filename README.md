@@ -46,7 +46,11 @@ Dimensions Table
 
 5. **time_dim**: Standard time dimension table.
     - *date, day, week, month, year, weekday*
-    
+
+Entity Relationship Diagram
+===========================
+![ERD](erd.png)
+
 DATA DICTIONARY
 ===============
 
@@ -58,7 +62,7 @@ daily_quotes_fact
 Field Name    | Data Type     | Description     
 ------------- |-------------  | -------------
 quote_id      | Integer       | Unique fact ID
-symbol        | Text          | Security NASDAQ Symbol
+security_id   | Integer       | Unique security ID
 company_id    | Integer       | Company ID identifier
 date          | Date          | Date of the quote
 demographic_id| Text          | Security NASDAQ Symbol
@@ -74,6 +78,7 @@ security_dim
 
 Field Name        | Data Type     | Description     
 -------------    |-------------  | -------------
+security_id      | Integer       | Unique security ID
 symbol           | Text          | Security NASDAQ Symbol
 primary_sic_code | Integer       | Primary [SIC Code](https://en.wikipedia.org/wiki/Standard_Industrial_Classification) for the symbol (if available)
 security_name    | Text          | Name of the security
