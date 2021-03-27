@@ -1,0 +1,16 @@
+name: nasdaq-dwh
+
+dependencies:
+  - python
+  - numpy
+  - pandas
+  - sqlalchemy
+  - pip
+  - psycopg2
+  - pip:
+    - dagster
+    - dbt
+    - dagster-dbt
+    - dagster-pandas
+    - dagster-postgres
+    - dagit
