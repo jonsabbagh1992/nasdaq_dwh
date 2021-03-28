@@ -5,15 +5,15 @@ Created on Sun Mar 21 10:40:27 2021
 @author: jbsab
 """
 
-from dagster import pipeline
-from solids import (
+from dagster import pipeline, ModeDefinition, OutputDefinition, fs_io_manager
+from scripts.solids import (
         conifgured_read_csv,
         load_table_from_df,
-        read_etfs,
-        read_stocks,
+        read_and_load_etfs,
+        read_and_load_stocks
     )
 
-@pipeline
+@pipeline(mode_defs=[ModeDefinition(resource_defs={"fs": fs_io_manager})])
 def nasdaq_pipeline():
     # Companies
     read_companies = conifgured_read_csv.alias("read_companies")
@@ -31,9 +31,7 @@ def nasdaq_pipeline():
     load_demographics(read_demographics())
     
     # ETFs
-    load_etfs = load_table_from_df.alias("load_etfs")
-    load_etfs(read_etfs())
+    read_and_load_etfs()
     
     # Stocks
-    load_stocks = load_table_from_df.alias("load_stocks")
-    load_stocks(read_stocks())
+    read_and_load_stocks()
